@@ -2,6 +2,7 @@ import numpy as np
 import typing 
 import time 
 import matplotlib.pyplot as plt 
+from helpers import feet2meters, meters2feet 
 
 class Travel:
     def __init__(self, 
@@ -15,6 +16,22 @@ class Travel:
         self.action_history = []
         self.interfaces = interfaces
         print(f"Pose at initialization: {self.current_pose}")
+
+    @property
+    def x(self):
+        return self.current_pose[0]
+
+    @property 
+    def y(self):
+        return self.current_pose[1] 
+        
+    @property
+    def psi(self):
+        return self.current_pose[2] 
+
+    @property
+    def is_near_goal(self):
+        return (0 <=self.current_pose[0] <= feet2meters(4)) and (feet2meters(6) <= self.current_pose[1] <= feet2meters(10)) 
 
     def update_log_forward(self, average_heading, distance_meters):
         new_x = self.current_pose[0] + distance_meters * np.sin(np.deg2rad(average_heading))

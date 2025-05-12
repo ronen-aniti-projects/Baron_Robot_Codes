@@ -55,15 +55,27 @@ def main2():
         block_color = block_colors.pop(0) 
         print(f"Heading to this color: {block_color}") # Erase after today
         while True:
+
+            # When the robot has gripped the target block:
+            # -> It pivots to the goal
+            # -> It moves forward towards the goal
+            # IDAEA: After the first drop off, flag the entire goal box as NEAR_GOAL. Then, if NEAR_GOAL, 
+            # and facing NEAR GOAL, drop the block off 
+            # -> It ungrips the block
+            # -> It reverses
+            # -> It turns around (180 deg)
             if block_aquired:
                 distance_to_goal = robot.pivot_to_goal()
+                
+                #TODO: Add logic so that the robot actually inches towards the goal. When the robot estimates it's near the goal and facing the goal and on at least its second delivery, then it should drive to wherever it sees another object. If the robot senses its within 4 inches of a wall, it should stop, back up
+                step_size = distance_to_goal / 10
+
                 robot.forward(distance_to_goal)
                 robot.open_gripper()
                 block_aquired = False
                 robot.reverse(feet2meters(0.5))
                 for _ in range(3):
                     robot.pivot_right(60)
-                # Celebratory movement only for Tues. practice
                 robot.close_gripper()
                 robot.open_gripper()
                 if len(block_colors) == 0:
@@ -71,6 +83,13 @@ def main2():
                     break
                 block_color = block_colors.pop(0)
 
+            # When the robot does NOT have a block gripped:
+            # -> It takes a picture
+            # -> It checks if there are any target blocks in the frame
+            # -> If there are, then it pivots towards one
+            #    and moves towards it.
+            # -> If there aren't, then it pivots by 30 degrees to the right
+            # -> IDEA: Check for all colors. If pivot angle of any two are within 10 degrees of each other, don't approach either
             ret, grip_now, angle_degrees, direction, pixel_error = robot.scan(block_color=block_color)
             if ret:
 
@@ -82,32 +101,15 @@ def main2():
 
                 if direction == "right":
                     robot.pivot_right(angle_degrees)
-                    # Correct for alignment with frame
-                    while True:
-                        ret, grip_now, angle_degrees, direction, pixel_error = robot.scan(block_color=block_color)
-                        if abs(pixel_error) < config.pixel_error_cutoff:
-                            break
-                        if ret and pixel_error < 0:
-                            robot.pulse_right()
-                        if ret and pixel_error > 0:
-                            robot.pulse_left()
 
                 elif direction == "left":
                     robot.pivot_left(angle_degrees)
-                    # Correct for alignment with frame
-                    while True:
-                        ret, grip_now, angle_degrees, direction, pixel_error = robot.scan(block_color=block_color)
-                        if abs(pixel_error) < config.pixel_error_cutoff:
-                            break
-                        if ret and pixel_error < 0:
-                            robot.pulse_right()
-                        if ret and pixel_error > 0:
-                            robot.pulse_left()
                             
                 robot.forward(feet2meters(0.5))
 
             else:
                 robot.pivot_right(30)
+
 
     except KeyboardInterrupt:
         print("Off")
@@ -166,7 +168,7 @@ def main1():
 
 
 if __name__ == "__main__":
-    #main2()
-    main3() 
+    main2()
+    #main3() 
 
 
