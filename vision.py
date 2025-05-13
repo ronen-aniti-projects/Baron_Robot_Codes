@@ -44,8 +44,11 @@ class Vision:
             )
             mask = cv2.bitwise_or(mask1, mask2)
         elif block_color == "blue":
-            #Implement a blue mask
-            pass
+            mask = cv2.inRange(
+                hsv,
+                self.config.blue_mask_low,
+                self.config.blue_mask_high
+            )
             
         contours, _ = cv2.findContours(
             mask, 
@@ -53,17 +56,17 @@ class Vision:
             cv2.CHAIN_APPROX_SIMPLE
         )
         if not contours:
-            return False, False, None, None 
+            return False, False, None, None, None
         
         largest = max(contours, key=cv2.contourArea)
         if cv2.contourArea(largest) < self.config.contour_area_thresh:
-            return False, False, None, None 
+            return False, False, None, None, None
         x, y, w, h = cv2.boundingRect(largest)
         cx_bb = x + w // 2 
         cy_bb = y + h // 2 
 
 
-        """
+        
         # debug visuals:
         ############
         W = 640
@@ -71,7 +74,7 @@ class Vision:
         cx_image = W // 2
         cy_image = H // 2
         rgb_annotated = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
-        rgb_annotated[(self.config.image_height-70):,:,:] = 0
+       
         cv2.drawMarker(
             rgb_annotated, 
             (cx_image, cy_image), 
@@ -103,99 +106,15 @@ class Vision:
         # Display
         cv2.imshow("Mask", mask)
         cv2.waitKey(0)
-        """
+        
 
 
         # Change this later
         # This is the condition for the block being close enough
-        if cy_bb > self.config.image_height - self.config.pixel_cutoff:
+        if cy_bb > 0.85 * self.config.image_height:
             print("Grip now")
-            return True, True, None, None
+            return True, True, None, None, cy_bb
 
         pivot_angle, direction, pixel_error = self.estimate_pivot(cx_bb, cy_bb)
-        return True, False, pivot_angle, direction
-
-    """     
-    def detect_red_blocks(self)
-        hsv = self.interfaces.capture_array()
-        
-        mask1 = cv2.inRange(
-            hsv, 
-            self.config.red_mask_1_low,
-            self.config.red_mask_1_high
-        )
-        mask2 = cv2.inRange(
-            hsv, 
-            self.config.red_mask_2_low,
-            self.config.red_mask_2_high
-        )
-        red_mask = cv2.bitwise_or(mask1, mask2)
-
-        contours, _ = cv2.findContours(
-            red_mask, 
-            cv2.RETR_EXTERNAL,
-            cv2.CHAIN_APPROX_SIMPLE
-        )
-        if not contours:
-            return None 
-        
-        largest = max(countours, key=cv2.contourArea)
-        x, y, w, h = cv2.boundingRect(largest)
-        
-        cx_bb = x + w // 2 
-        cy_bb = y + h // 2 
-
-        pivot_angle, direction = estimate_pivot(cx_bb, cy_bb)
-        distance = estimate_distance(w, h)
-
-        return [
-            pivot_angle, 
-            direction, 
-            distance, 
-            (x, y, w, h) # bounding box
-        ] 
-    """
-
-    """
-    def detect_blue_blocks(self): 
-        hsv = self.interfaces.capture_array()
-        
-        # For human analysis:
-        rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB) 
-        
-        mask = cv2.inRange(
-            hsv, 
-            self.config.blue_mask_low
-            self.config.blue_mask_high
-        )
-
-        contours, _ = cv2.findContours(
-            mask, 
-            cv2.RETR_EXTERNAL,
-            cv2.CHAIN_APPROX_SIMPLE
-        )
-        if not contours:
-            return None 
-        
-        largest = max(countours, key=cv2.contourArea)
-        x, y, w, h = cv2.boundingRect(largest)
-        
-        # For human analysis:
-        cv2.rectangle(
-            rgb, 
-            (x, y),
-            (x + w, y + h),
-            color=(0, 255, 0),
-            thickness=1
-        )
-
-        cx_bb = x + w // 2 
-        cy_bb = y + h // 2 
-
-        pivot_angle, direction = estimate_pivot(cx_bb, cy_bb)
-        distance = estimate_distance(w, h)
-
-        return [pivot_angle, direction, distance] 
-        """
-
+        return True, False, pivot_angle, direction, cy_bb
 

@@ -55,7 +55,8 @@ def main2():
         block_color = block_colors.pop(0) 
         print(f"Heading to this color: {block_color}") # Erase after today
         while True:
-
+            print("Robot Pose {robot.travel_log.current_pose}")
+            robot.travel_log.show_trajectory()
             # When the robot has gripped the target block:
             # -> It pivots to the goal
             # -> It moves forward towards the goal
@@ -68,7 +69,7 @@ def main2():
                 distance_to_goal = robot.pivot_to_goal()
                 
                 #TODO: Add logic so that the robot actually inches towards the goal. When the robot estimates it's near the goal and facing the goal and on at least its second delivery, then it should drive to wherever it sees another object. If the robot senses its within 4 inches of a wall, it should stop, back up
-                step_size = distance_to_goal / 10
+                #step_size = distance_to_goal / 10
 
                 robot.forward(distance_to_goal)
                 robot.open_gripper()
@@ -90,8 +91,10 @@ def main2():
             #    and moves towards it.
             # -> If there aren't, then it pivots by 30 degrees to the right
             # -> IDEA: Check for all colors. If pivot angle of any two are within 10 degrees of each other, don't approach either
-            ret, grip_now, angle_degrees, direction, pixel_error = robot.scan(block_color=block_color)
+            ret, grip_now, angle_degrees, direction, cy = robot.scan(block_color=block_color)
             if ret:
+
+                
 
                 if grip_now: 
                     robot.close_gripper()
@@ -104,8 +107,11 @@ def main2():
 
                 elif direction == "left":
                     robot.pivot_left(angle_degrees)
-                            
-                robot.forward(feet2meters(0.5))
+                print(cy)
+                if cy > 0.70 * robot.config.image_height:
+                    robot.forward(feet2meters(0.1)) 
+                else:
+                    robot.forward(feet2meters(1))
 
             else:
                 robot.pivot_right(30)

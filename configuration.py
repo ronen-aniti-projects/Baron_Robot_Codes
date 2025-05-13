@@ -12,9 +12,8 @@ class Configuration:
         self.construction_xmax = feet2meters(4)
         self.construction_ymin = feet2meters(6)
         self.construction_ymax = feet2meters(10)
-        self.pivot_tolerance = 5 # degrees
+        self.pivot_tolerance = 1 # degrees
         
-
         # Pins
         self.left_encoder_pin = 12
         self.right_encoder_pin = 7
@@ -46,13 +45,13 @@ class Configuration:
         self.red_mask_2_high = np.array([179, 255, 255])
         self.green_mask_low = np.array([35, 60, 40])
         self.green_mask_high = np.array([85, 255, 255])
-        self.blue_mask_low = np.array([])
-        self.blue_mask_high = np.array([])
+        self.blue_mask_low = np.array([100, 150,  50])
+        self.blue_mask_high = np.array([140, 255, 255])
         self.bb_thresh = 140
         self.image_width = 640
         self.image_height = 480 
         self.contour_area_thresh = 20
-        self.pixel_cutoff = 90   
+        self.pixel_cutoff = 90
         self.pixel_error_cutoff = 20
 
         # IMU

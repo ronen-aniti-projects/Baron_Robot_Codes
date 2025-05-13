@@ -1,5 +1,7 @@
 import numpy as np 
-from helpers import 
+from helpers import feet2meters, meters2feet, heading_error 
+import math 
+
 
 class Robot:
     def __init__(self, config, interfaces, moves, travel_log, vision):
@@ -53,34 +55,31 @@ class Robot:
 
     def scan(self, block_color):
         if block_color == "green":
-            ret, grip_now, angle_degrees, direction = self.vision.scan(block_color = "green")
+            ret, grip_now, angle_degrees, direction, cy = self.vision.scan(block_color = "green")
         elif block_color == "red":
-            ret, grip_now, angle_degrees, direction = self.vision.scan(block_color = "red")
+            ret, grip_now, angle_degrees, direction, cy = self.vision.scan(block_color = "red")
         elif block_color == "blue":
-            ret, grip_now, angle_degrees, directinon = self.vision.scan(block_color == "blue")
-        return ret, grip_now, angle_degrees, direction
+            ret, grip_now, angle_degrees, direction, cy = self.vision.scan(block_color = "blue")
+        return ret, grip_now, angle_degrees, direction, cy
     
     def pivot_to_goal(self):
-        current_x, current_y, current_heading = self.travel_log.current_pose.copy()
-        goal_x, goal_y, goal_heading = self.travel_log.construction_pose.copy()
-        dx_abs = abs(goal_x - current_x)
-        dy_abs = abs(goal_y - current_y)
-        
-        if current_heading >= 0:
-            pivot_angle = abs(current_heading) + np.rad2deg(np.arctan(dx_abs / dy_abs))
-            print(f"Final pivot left to face the goal: Pivot left {pivot_angle: .2f} degrees.")
-            self.moves.pivot_left(pivot_angle)
+        current_x, current_y, current_psi = self.travel_log.current_pose 
+        goal_x, goal_y, goal_psi = self.travel_log.construction_pose 
+        error = heading_error(goal_psi, current_psi)
+        if error > 0:
+            print(f"Pivot left {error: 0.2f} to goal")
+            self.moves.pivot_left(error)
+        elif error < 0:
+            print(f"Pivot right {error: 0.2f} to goal")
+            self.moves.pivot_right(-error)
         else:
-            pivot_angle = current_heading + np.rad2deg(np.arctan(dx_abs / dy_abs))
-            print(f"Final pivot right to face the goal: Pivot right {pivot_angle: .2f} degrees")
-            self.moves.pivot_right(pivot_angle)
-
-        current_heading = self.interfaces.read_imu()
-        self.travel_log.update_log_pivot_to_goal(current_heading)
-
-        distance_to_goal = (dx_abs*dx_abs + dy_abs*dy_abs)**0.5
-        print(f"Distance to goal: {distance_to_goal: .2f} m")
-        return distance_to_goal 
+            print("Already facing the goal heading")
+        
+        new_heading  = self.interfaces.read_imu()
+        self.travel_log.update_log_pivot_to_goal(new_heading)
+        dist = math.hypot(goal_x - current_x, goal_y - current_y)
+        return dist 
+        
 
     def open_gripper(self):
         self.interfaces.open_gripper()

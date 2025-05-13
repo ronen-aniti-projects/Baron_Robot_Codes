@@ -4,6 +4,7 @@ import time
 import matplotlib.pyplot as plt 
 from helpers import feet2meters, meters2feet 
 
+
 class Travel:
     def __init__(self, 
         interfaces,
@@ -24,7 +25,7 @@ class Travel:
     @property 
     def y(self):
         return self.current_pose[1] 
-        
+
     @property
     def psi(self):
         return self.current_pose[2] 
@@ -61,8 +62,7 @@ class Travel:
     def update_log_pulse_right(self, new_heading):
         self.current_pose[2] = new_heading 
         self.action_history.append(f"pulse right")
-        self.pose_history.append([time.time-self.start_time, self.current_pose.copy()])
-
+        self.pose_history.append([time.time()-self.start_time, self.current_pose.copy()])
 
     def update_log_pivot_left(self, new_heading, angle_command):
         self.current_pose[2] = new_heading
@@ -82,6 +82,7 @@ class Travel:
     def show_trajectory(self):
         times, poses = zip(*self.pose_history)
         xs, ys, _ = zip(*poses)
+        plt.figure()
         plt.plot(xs, ys, marker='o')
         plt.xlabel("X (m)")
         plt.ylabel("Y (m)")
