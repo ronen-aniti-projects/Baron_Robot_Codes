@@ -41,7 +41,8 @@ class Moves:
         print(f"Error in heading {error}")
         self.interfaces.motors_lr.ChangeDutyCycle(100)
         self.interfaces.motors_rf.ChangeDutyCycle(100)
-        while((error * initial_error) > 0) and (abs(error) > self.pivot_tolerance):
+        while(abs(error) > self.pivot_tolerance): 
+            #(error * initial_error) > 0) and
             error = normalize_angle(goal_heading - self.interfaces.read_imu())
             print(error)
         self.interfaces.stop_motors()
@@ -59,7 +60,8 @@ class Moves:
         print(f"Error in heading {error}")
         self.interfaces.motors_lf.ChangeDutyCycle(100)
         self.interfaces.motors_rr.ChangeDutyCycle(100)
-        while((error * initial_error) > 0) and (abs(error) > self.pivot_tolerance):
+        while(abs(error) > self.pivot_tolerance): 
+            # (error * initial_error) > 0) and
             error = normalize_angle(goal_heading - self.interfaces.read_imu())
             print(error)
         self.interfaces.stop_motors()

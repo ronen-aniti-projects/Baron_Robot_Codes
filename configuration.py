@@ -12,7 +12,7 @@ class Configuration:
         self.construction_xmax = feet2meters(4)
         self.construction_ymin = feet2meters(6)
         self.construction_ymax = feet2meters(10)
-        self.pivot_tolerance = 1 # degrees
+        self.pivot_tolerance = 2# degrees
         
         # Pins
         self.left_encoder_pin = 12

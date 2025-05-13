@@ -102,16 +102,17 @@ class Vision:
         ################
         # Display
         cv2.imshow("Blurred with BB", rgb_annotated)
-        cv2.waitKey(0)
+        cv2.waitKey(100) 
         # Display
         cv2.imshow("Mask", mask)
-        cv2.waitKey(0)
-        
+        cv2.waitKey(100) 
+        cv2.destroyWindow("Blurred with BB")
+        cv2.destroyWindow("Mask") 
 
 
         # Change this later
         # This is the condition for the block being close enough
-        if cy_bb > 0.85 * self.config.image_height:
+        if cy_bb > 0.90 * self.config.image_height:
             print("Grip now")
             return True, True, None, None, cy_bb
 

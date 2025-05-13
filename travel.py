@@ -87,4 +87,6 @@ class Travel:
         plt.xlabel("X (m)")
         plt.ylabel("Y (m)")
         plt.title("Robot Trajectory")
-        plt.show()
+        plt.show(block=False)
+        plt.pause(1.0)
+        plt.close()

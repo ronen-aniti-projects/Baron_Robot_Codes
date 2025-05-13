@@ -1,5 +1,5 @@
 import numpy as np 
-from helpers import feet2meters, meters2feet, heading_error 
+from helpers import feet2meters, meters2feet, normalize_angle
 import math 
 
 
@@ -63,23 +63,33 @@ class Robot:
         return ret, grip_now, angle_degrees, direction, cy
     
     def pivot_to_goal(self):
-        current_x, current_y, current_psi = self.travel_log.current_pose 
-        goal_x, goal_y, goal_psi = self.travel_log.construction_pose 
-        error = heading_error(goal_psi, current_psi)
-        if error > 0:
-            print(f"Pivot left {error: 0.2f} to goal")
-            self.moves.pivot_left(error)
-        elif error < 0:
-            print(f"Pivot right {error: 0.2f} to goal")
-            self.moves.pivot_right(-error)
-        else:
-            print("Already facing the goal heading")
-        
-        new_heading  = self.interfaces.read_imu()
-        self.travel_log.update_log_pivot_to_goal(new_heading)
-        dist = math.hypot(goal_x - current_x, goal_y - current_y)
-        return dist 
-        
+        goal_x = self.travel_log.construction_pose[0]
+        goal_y = self.travel_log.construction_pose[1]
+        current_x = self.travel_log.current_pose[0]
+        current_y = self.travel_log.current_pose[1]
+        current_psi = self.travel_log.current_pose[2]
+        dx = abs(goal_x - current_x)
+        dy = abs(goal_y - current_y)
+
+        theta = np.arctan(dx / dy) * 180/np.pi
+        if abs(current_psi) > theta:
+            if current_psi < 0:
+                self.pivot_right(abs(current_psi) - theta)
+            elif current_psi > 0:
+                self.pivot_left(current_psi + theta)
+        elif abs(current_psi) < theta:
+            if current_psi < 0:
+                self.pivot_left(theta - abs(current_psi))
+            elif current_psi > 0:
+                self.pivot_left(curretn_psi + theta)
+
+        distance = (dx*dx + dy*dy)**0.5
+        #ADD update travel log~!
+
+        return distance
+
+
+            
 
     def open_gripper(self):
         self.interfaces.open_gripper()

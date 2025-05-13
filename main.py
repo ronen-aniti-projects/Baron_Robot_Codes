@@ -108,10 +108,10 @@ def main2():
                 elif direction == "left":
                     robot.pivot_left(angle_degrees)
                 print(cy)
-                if cy > 0.70 * robot.config.image_height:
+                if cy > 0.8 * robot.config.image_height:
                     robot.forward(feet2meters(0.1)) 
                 else:
-                    robot.forward(feet2meters(1))
+                    robot.forward(feet2meters(.75))
 
             else:
                 robot.pivot_right(30)
